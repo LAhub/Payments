@@ -1,0 +1,138 @@
+# docker-compose.yml
+# Complete stack for local development
+
+version: '3.9'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: payment-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: payments_db
+      POSTGRES_USER: payments_user
+      POSTGRES_PASSWORD: payments_pass
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - payment-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U payments_user -d payments_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Payment Initiation Service
+  payment-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      platforms:
+        - linux/arm64  # Para Apple Silicon
+        - linux/amd64  # Para compatibilidad
+    container_name: payment-service
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_R2DBC_URL: r2dbc:postgresql://postgres:5432/payments_db
+      SPRING_R2DBC_USERNAME: payments_user
+      SPRING_R2DBC_PASSWORD: payments_pass
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info,metrics,prometheus
+      LOGGING_LEVEL_ROOT: INFO
+      LOGGING_LEVEL_COM_BANK_PAYMENTS: DEBUG
+      JAVA_OPTS: "-Xms512m -Xmx1024m"
+    ports:
+      - "8080:8080"
+    networks:
+      - payment-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    volumes:
+      - app_logs:/app/logs
+
+  # Prometheus - Metrics Collection
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    container_name: payment-prometheus
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - payment-network
+    depends_on:
+      - payment-service
+
+  # Grafana - Metrics Visualization
+  grafana:
+    image: grafana/grafana:10.2.2
+    container_name: payment-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: false
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning
+      - ./docker/grafana/dashboards:/var/lib/grafana/dashboards
+    networks:
+      - payment-network
+    depends_on:
+      - prometheus
+
+  # pgAdmin - Database Management (Optional)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: payment-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@bank.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - payment-network
+    depends_on:
+      - postgres
+
+networks:
+  payment-network:
+    driver: bridge
+    name: payment-network
+
+volumes:
+  postgres_data:
+    name: payment-postgres-data
+  prometheus_data:
+    name: payment-prometheus-data
+  grafana_data:
+    name: payment-grafana-data
+  pgadmin_data:
+    name: payment-pgadmin-data
+  app_logs:
+    name: payment-app-logs

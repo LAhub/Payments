@@ -1,0 +1,17 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  scrape_timeout: 10s
+
+scrape_configs:
+  - job_name: 'payment-initiation-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['payment-service:8080']
+        labels:
+          application: 'Payment Initiation Service'
+          environment: 'docker'
+          team: 'banking-it'
+
+    # Scrape más frecuente para desarrollo
+    scrape_interval: 10s

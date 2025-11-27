@@ -1,0 +1,40 @@
+# .dockerignore
+# Files to exclude from Docker build context
+
+# Maven
+target/
+.mvn/
+mvnw
+mvnw.cmd
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+
+# Git
+.git/
+.gitignore
+
+# Docker
+docker-compose*.yml
+Dockerfile*
+*.md
+
+# Logs
+logs/
+*.log
+
+# Tests
+src/test/
+
+# Documentation
+docs/
+README.md
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+Jenkinsfile

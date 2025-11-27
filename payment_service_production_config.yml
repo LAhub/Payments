@@ -1,0 +1,85 @@
+# docker-compose.prod.yml
+# Production-ready configuration with security hardening
+
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: payment-postgres-prod
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    networks:
+      - payment-network-prod
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  payment-service:
+    image: bank/payment-initiation-service:${VERSION:-latest}
+    container_name: payment-service-prod
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_R2DBC_URL: ${SPRING_R2DBC_URL}
+      SPRING_R2DBC_USERNAME: ${POSTGRES_USER}
+      SPRING_R2DBC_PASSWORD: ${POSTGRES_PASSWORD}
+      JAVA_OPTS: "-Xms1g -Xmx2g -XX:+UseG1GC"
+    ports:
+      - "8080:8080"
+    networks:
+      - payment-network-prod
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2.5G
+        reservations:
+          cpus: '1'
+          memory: 1.5G
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  payment-network-prod:
+    driver: bridge
+    name: payment-network-prod
+
+volumes:
+  postgres_data_prod:
+    name: payment-postgres-data-prod

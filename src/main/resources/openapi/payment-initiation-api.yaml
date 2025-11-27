@@ -1,0 +1,273 @@
+
+openapi: 3.0.3
+info:
+  title: Payment Initiation API
+  description: REST API for payment order initiation and management, aligned with BIAN Payment Initiation Service Domain
+  version: 1.0.0
+  contact:
+    name: Banking IT Team
+    email: api-support@bank.com
+
+servers:
+  - url: http://localhost:8080
+    description: Local development
+  - url: https://api.bank.com/v1
+    description: Production
+
+paths:
+  /payment-initiation/payment-orders:
+    post:
+      operationId: initiatePaymentOrder
+      summary: Initiate a payment order
+      description: Creates and initiates a new payment order in the system
+      tags:
+        - Payment Orders
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: false
+          schema:
+            type: string
+            format: uuid
+          description: Unique key for idempotency to prevent duplicate payments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitiatePaymentOrderRequestDto'
+      responses:
+        '201':
+          description: Payment order created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InitiatePaymentOrderResponseDto'
+        '400':
+          description: Bad request - validation errors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        '409':
+          description: Duplicate payment order (idempotency key collision)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+
+  /payment-initiation/payment-orders/{paymentOrderId}:
+    get:
+      operationId: retrievePaymentOrder
+      summary: Retrieve payment order details
+      description: Gets complete information about a specific payment order
+      tags:
+        - Payment Orders
+      parameters:
+        - name: paymentOrderId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Unique identifier of the payment order
+      responses:
+        '200':
+          description: Payment order found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentOrderDetailsDto'
+        '404':
+          description: Payment order not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+
+  /payment-initiation/payment-orders/{paymentOrderId}/status:
+    get:
+      operationId: retrievePaymentOrderStatus
+      summary: Retrieve payment order status
+      description: Gets the current status of a payment order
+      tags:
+        - Payment Orders
+      parameters:
+        - name: paymentOrderId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Unique identifier of the payment order
+      responses:
+        '200':
+          description: Status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentOrderStatusDto'
+        '404':
+          description: Payment order not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+
+components:
+  schemas:
+    InitiatePaymentOrderRequestDto:
+      type: object
+      required:
+        - paymentOrderReference
+        - debtorAccount
+        - creditorAccount
+        - instructedAmount
+        - requestedExecutionDateTime
+      properties:
+        paymentOrderReference:
+          type: string
+          maxLength: 50
+          example: "REF-2025-001"
+          description: External reference for the payment order
+        debtorAccount:
+          type: string
+          pattern: '^[A-Z]{2}[0-9]{2}[A-Z0-9]{1,30}$'
+          example: "ES7921000813610123456789"
+          description: IBAN of the debtor account
+        creditorAccount:
+          type: string
+          pattern: '^[A-Z]{2}[0-9]{2}[A-Z0-9]{1,30}$'
+          example: "ES1420805801101234567891"
+          description: IBAN of the creditor account
+        instructedAmount:
+          $ref: '#/components/schemas/AmountDto'
+        remittanceInformation:
+          type: string
+          maxLength: 255
+          example: "Invoice payment"
+          description: Payment concept or additional information
+        requestedExecutionDateTime:
+          type: string
+          format: date
+          example: "2025-11-25"
+          description: Requested execution date for the payment
+
+    InitiatePaymentOrderResponseDto:
+      type: object
+      properties:
+        paymentOrderId:
+          type: string
+          example: "PO-2025-001"
+          description: Unique identifier assigned to the payment order
+        paymentOrderStatus:
+          $ref: '#/components/schemas/PaymentStatusDto'
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-11-24T10:30:00Z"
+          description: Timestamp when the payment order was created
+
+    PaymentOrderDetailsDto:
+      type: object
+      properties:
+        paymentOrderId:
+          type: string
+          example: "PO-2025-001"
+        paymentOrderReference:
+          type: string
+          example: "REF-2025-001"
+        debtorAccount:
+          type: string
+          example: "ES7921000813610123456789"
+        creditorAccount:
+          type: string
+          example: "ES1420805801101234567891"
+        instructedAmount:
+          $ref: '#/components/schemas/AmountDto'
+        remittanceInformation:
+          type: string
+          example: "Invoice payment"
+        requestedExecutionDateTime:
+          type: string
+          format: date
+          example: "2025-11-25"
+        paymentOrderStatus:
+          $ref: '#/components/schemas/PaymentStatusDto'
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-11-24T10:30:00Z"
+        lastUpdatedAt:
+          type: string
+          format: date-time
+          example: "2025-11-24T10:35:00Z"
+
+    PaymentOrderStatusDto:
+      type: object
+      properties:
+        paymentOrderId:
+          type: string
+          example: "PO-2025-001"
+        paymentOrderStatus:
+          $ref: '#/components/schemas/PaymentStatusDto'
+        lastUpdatedAt:
+          type: string
+          format: date-time
+          example: "2025-11-24T10:35:00Z"
+
+    AmountDto:
+      type: object
+      required:
+        - amount
+        - currency
+      properties:
+        amount:
+          type: number
+          format: double
+          minimum: 0.01
+          example: 1500.0
+          description: Payment amount
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+          example: "EUR"
+          description: Currency code (ISO 4217)
+
+    PaymentStatusDto:
+      type: string
+      enum:
+        - PENDING
+        - ACCEPTED
+        - PROCESSING
+        - SETTLED
+        - REJECTED
+        - CANCELLED
+        - FAILED
+      description: Status of the payment order
+
+    ErrorResponseDto:
+      type: object
+      properties:
+        type:
+          type: string
+          example: "https://api.bank.com/problems/validation-error"
+        title:
+          type: string
+          example: "Validation Error"
+        status:
+          type: integer
+          example: 400
+        detail:
+          type: string
+          example: "Payment order reference is required"
+        instance:
+          type: string
+          example: "/payment-initiation/payment-orders"
+        timestamp:
+          type: string
+          format: date-time

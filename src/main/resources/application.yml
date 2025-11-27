@@ -1,0 +1,74 @@
+# src/main/resources/application.yml
+
+spring:
+  application:
+    name: payment-initiation-service
+
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/payments_db
+    username: payments_user
+    password: postgres
+    pool:
+      initial-size: 10
+      max-size: 50
+      max-idle-time: 30m
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,loggers
+      base-path: /actuator
+
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+
+  metrics:
+    tags:
+      application: ${spring.application.name}
+      environment: ${ENVIRONMENT:local}
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      slo:
+        http.server.requests: 50ms,100ms,200ms,500ms,1s,2s
+
+  tracing:
+    sampling:
+      probability: 1.0  # 100% sampling in development, reduce in production
+
+  health:
+    readiness-state:
+      enabled: true
+    liveness-state:
+      enabled: true
+
+# Logging Configuration
+logging:
+  level:
+    root: INFO
+    com.ec.bank.payments: DEBUG
+    org.springframework.r2dbc: DEBUG
+    io.r2dbc.postgresql: DEBUG
+    org.springframework.web: DEBUG
+    reactor.netty: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# Application Configuration
+application:
+  payment:
+    max-amount: 1000000
+    supported-currencies: EUR,USD,GBP

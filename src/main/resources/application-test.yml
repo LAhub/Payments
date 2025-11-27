@@ -1,0 +1,19 @@
+# src/main/resources/application-test.yml
+
+spring:
+  r2dbc:
+    url: r2dbc:tc:postgresql:///test?TC_IMAGE_TAG=15-alpine
+    username: test
+    password: test
+
+logging:
+  level:
+    root: WARN
+    com.bank.payments: DEBUG
+    org.testcontainers: INFO
+
+management:
+  metrics:
+    export:
+      prometheus:
+        enabled: false
