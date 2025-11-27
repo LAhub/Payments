@@ -1,0 +1,517 @@
+{
+	"info": {
+		"_postman_id": "93f792f4-efe7-443f-96b6-2524855afd0f",
+		"name": "Payment Initiation API",
+		"description": "Colección completa de pruebas para el servicio de iniciación de pagos - BIAN aligned",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "4478278"
+	},
+	"item": [
+		{
+			"name": "1. Initiate Payment Orders",
+			"item": [
+				{
+					"name": "1.1 Create Payment Order - Standard EUR",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Idempotency-Key",
+								"value": "{{$guid}}",
+								"description": "Unique idempotency key"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"paymentOrderReference\": \"PAY-2024-001-EUR\",\n  \"debtorAccount\": \"DE89370400440532013000\",\n  \"creditorAccount\": \"GB29NWBK60161331926819\",\n  \"amount\": 1500.50,\n  \"currency\": \"EUR\",\n  \"remittanceInformation\": \"Invoice payment for services rendered - January 2024\",\n  \"requestedExecutionDateTime\": \"2024-12-01T10:00:00Z\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/payment-initiation/payment-orders",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payment-initiation",
+								"payment-orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "1.2 Create Payment Order - USD Large Amount",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Idempotency-Key",
+								"value": "{{$guid}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"paymentOrderReference\": \"PAY-2024-002-USD\",\n  \"debtorAccount\": \"US64SVBKUS6S3300958879\",\n  \"creditorAccount\": \"CA92ROYL1234567890123\",\n  \"amount\": 50000.00,\n  \"currency\": \"USD\",\n  \"remittanceInformation\": \"International supplier payment - Contract #2024-AB-123\",\n  \"requestedExecutionDateTime\": \"2024-12-02T14:30:00Z\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/payment-initiation/payment-orders",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payment-initiation",
+								"payment-orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "1.3 Create Payment Order - GBP Salary",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Idempotency-Key",
+								"value": "{{$guid}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"paymentOrderReference\": \"SALARY-2024-NOV-001\",\n  \"debtorAccount\": \"GB82WEST12345698765432\",\n  \"creditorAccount\": \"GB29NWBK60161331926819\",\n  \"amount\": 3500.00,\n  \"currency\": \"GBP\",\n  \"remittanceInformation\": \"Monthly salary November 2024 - Employee ID: EMP-12345\",\n  \"requestedExecutionDateTime\": \"2024-11-30T09:00:00Z\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/payment-initiation/payment-orders",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payment-initiation",
+								"payment-orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "1.4 Create Payment Order - Small EUR Transfer",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Idempotency-Key",
+								"value": "{{$guid}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"paymentOrderReference\": \"PAY-2024-UTIL-001\",\n  \"debtorAccount\": \"FR1420041010050500013M02606\",\n  \"creditorAccount\": \"ES9121000418450200051332\",\n  \"amount\": 125.75,\n  \"currency\": \"EUR\",\n  \"remittanceInformation\": \"Utility bill payment - December 2024\",\n  \"requestedExecutionDateTime\": \"2024-12-05T08:00:00Z\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/payment-initiation/payment-orders",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payment-initiation",
+								"payment-orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "1.5 Create Payment Order - Future Dated",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Idempotency-Key",
+								"value": "{{$guid}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"paymentOrderReference\": \"PAY-2024-FUTURE-001\",\n  \"debtorAccount\": \"IT60X0542811101000000123456\",\n  \"creditorAccount\": \"NL91ABNA0417164300\",\n  \"amount\": 8750.00,\n  \"currency\": \"EUR\",\n  \"remittanceInformation\": \"Scheduled payment for Q1 2025 subscription\",\n  \"requestedExecutionDateTime\": \"2025-01-15T00:00:00Z\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/payment-initiation/payment-orders",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payment-initiation",
+								"payment-orders"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Retrieve Payment Order Details",
+			"item": [
+				{
+					"name": "2.1 Get Payment Order Details - Valid ID 1",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/payment-initiation/payment-orders/{{payment_id_1}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payment-initiation",
+								"payment-orders",
+								"{{payment_id_1}}"
+							]
+						},
+						"description": "Retrieve full details of a payment order. Replace {{payment_id_1}} with actual payment order ID from previous creation."
+					},
+					"response": []
+				},
+				{
+					"name": "2.2 Get Payment Order Details - Valid ID 2",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/payment-initiation/payment-orders/{{payment_id_2}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payment-initiation",
+								"payment-orders",
+								"{{payment_id_2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.3 Get Payment Order Details - Valid ID 3",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/payment-initiation/payment-orders/{{payment_id_3}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payment-initiation",
+								"payment-orders",
+								"{{payment_id_3}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.4 Get Payment Order Details - Non-existent ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/payment-initiation/payment-orders/PAY-999999-NOTFOUND",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payment-initiation",
+								"payment-orders",
+								"PAY-999999-NOTFOUND"
+							]
+						},
+						"description": "Test error handling for non-existent payment order ID"
+					},
+					"response": []
+				},
+				{
+					"name": "2.5 Get Payment Order Details - Invalid Format ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/payment-initiation/payment-orders/INVALID-@#$-ID",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payment-initiation",
+								"payment-orders",
+								"INVALID-@"
+							],
+							"hash": "$-ID"
+						},
+						"description": "Test error handling for invalid ID format"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Retrieve Payment Order Status",
+			"item": [
+				{
+					"name": "3.1 Get Payment Status - Recently Created",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/payment-initiation/payment-orders/{{payment_id_1}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payment-initiation",
+								"payment-orders",
+								"{{payment_id_1}}",
+								"status"
+							]
+						},
+						"description": "Check status of recently created payment order"
+					},
+					"response": []
+				},
+				{
+					"name": "3.2 Get Payment Status - Pending Order",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/payment-initiation/payment-orders/{{payment_id_2}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payment-initiation",
+								"payment-orders",
+								"{{payment_id_2}}",
+								"status"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.3 Get Payment Status - Third Order",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/payment-initiation/payment-orders/{{payment_id_3}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payment-initiation",
+								"payment-orders",
+								"{{payment_id_3}}",
+								"status"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.4 Get Payment Status - Non-existent",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/payment-initiation/payment-orders/UNKNOWN-PAYMENT-ID/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payment-initiation",
+								"payment-orders",
+								"UNKNOWN-PAYMENT-ID",
+								"status"
+							]
+						},
+						"description": "Test error handling for non-existent payment status"
+					},
+					"response": []
+				},
+				{
+					"name": "3.5 Get Payment Status - Empty ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/payment-initiation/payment-orders/ /status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payment-initiation",
+								"payment-orders",
+								" ",
+								"status"
+							]
+						},
+						"description": "Test error handling for empty/whitespace ID"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. Health & Actuator",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/actuator/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"actuator",
+								"health"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Prometheus Metrics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/actuator/prometheus",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"actuator",
+								"prometheus"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "payment_id_1",
+			"value": "PO-14972ab5-de7a-477a-92f3-5ea42603dcd6",
+			"type": "string"
+		},
+		{
+			"key": "payment_id_2",
+			"value": "PO-ce51c54b-e32c-4d75-a8db-a3a88aa5a2c2",
+			"type": "string"
+		},
+		{
+			"key": "payment_id_3",
+			"value": "PO-4dc87d3a-e5c6-4167-8436-dfb656b9acb9",
+			"type": "string"
+		}
+	]
+}
